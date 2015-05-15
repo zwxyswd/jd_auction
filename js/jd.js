@@ -6,7 +6,7 @@ var aboutme = "***京东夺宝岛抢拍-谁与争锋***\n"
 console.log(aboutme);
 console.log("有任何问题 %c QQ 244320233", "color:red");
 console.log("个人主页：http://zhanghang.org");
-var priceLimit = parseInt(/\d+/.exec($(".fore4 del").html())*1*0.6);
+var priceLimit = parseInt(/\d+/.exec($(".cost del").html())*1*0.6);
 var addr = document.location.href;
 var uid = /[\d]{4,8}/.exec(addr)[0];
 var code = "<div id='qp_div'>"
@@ -26,11 +26,9 @@ function queryPrice(uid, priceLimit) {
 	console.info("自动报价，"+uid+"自动输入价格。");
 	var price;
 	var priceMax = $('#qp_max_price').val();
-	var time = new Date().getTime();
-	var queryIt = "http://auction.jd.com/json/paimai/bid_records?t="
-			+ time + "&pageNo=1&pageSize=1&dealId=" + uid;
+	var queryIt = "http://paimai.jd.com/json/current/englishquery?paimaiId=" + uid + "&skuId=0&t=" + getRamdomNumber() + "&start=0&end=0";
 	$.get(queryIt, function(data){
-		price = data.datas[0].price*1+1;
+		price = data.bidList[0].price*1+1;
 		if (price<=priceMax) {
 			$(".quantity-text:last").val(price);
 		} else {
@@ -43,17 +41,23 @@ function crazyBuying(uid, priceLimit) {
 	console.info("抢拍商品"+uid+"自动提交抢拍价。");
 	var price;
 	var priceMax = $('#qp_max_price').val();
-	var time = new Date().getTime();
-	var queryIt = "http://auction.jd.com/json/paimai/bid_records?t="
-			+ time + "&pageNo=1&pageSize=1&dealId=" + uid;
+	var queryIt = "http://paimai.jd.com/json/current/englishquery?paimaiId=" + uid + "&skuId=0&t=" + getRamdomNumber() + "&start=0&end=0";
 	$.get(queryIt, function(data){
-		price = data.datas[0].price*1+1;
+		price = data.bidList[0].price*1+1;
 		if (price<=priceMax) {
-			var buyIt = "http://auction.jd.com/json/paimai/bid?t="
-				+ time + "&dealId=" + uid + "&price=" + price;
-			$.get(buyIt, function(data){
-				sayMsg(data);
-			}, 'json');
+			var url = "http://paimai.jd.com/services/bid.action?t=" + getRamdomNumber();
+            var data = {paimaiId:uid,price:price,proxyFlag:0,bidSource:0};
+            $.getJSON(url,data,function(jqXHR){
+                if(jqXHR!=undefined){
+                    if(jqXHR.result=='200'){
+                        console.info("恭喜您，出价成功");
+                    }else if(jqXHR.result=='login'){
+                        window.location.href='http://passport.jd.com/new/login.aspx?ReturnUrl='+window.location.href;
+                    }else{
+                        console.info("很抱歉，出价失败");
+                    }
+                }
+            });
 		} else {
 			console.info("超出限制价格，停止抢购！");
 		}
@@ -148,6 +152,14 @@ function doErrorMsg(title, msg) {
 	console.log(title + " %c "+msg, "color:red;" )
 }
 
+function getRamdomNumber(){
+    var num=""; 
+    for(var i=0;i<6;i++) 
+    { 
+        num+=Math.floor(Math.random()*10); 
+    } 
+    return num;
+}
 
 
 
