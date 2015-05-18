@@ -29,11 +29,7 @@ function queryPrice(uid, priceLimit) {
 	var queryIt = "http://paimai.jd.com/json/current/englishquery?paimaiId=" + uid + "&skuId=0&t=" + getRamdomNumber() + "&start=0&end=0";
 	$.get(queryIt, function(data){
 		price = data.bidList[0].price*1+1;
-		if (price<=priceMax) {
-			$(".quantity-text:last").val(price);
-		} else {
-			console.info("超出限制价格，不自动输入抢拍价！");
-		}
+		$(".quantity-text:last").val(price);
 	});
 }
 
@@ -54,7 +50,7 @@ function crazyBuying(uid, priceLimit) {
                     }else if(jqXHR.result=='login'){
                         window.location.href='http://passport.jd.com/new/login.aspx?ReturnUrl='+window.location.href;
                     }else{
-                        console.info("很抱歉，出价失败");
+                        console.info("很抱歉，出价失败:" + jqXHR.message);
                     }
                 }
             });
